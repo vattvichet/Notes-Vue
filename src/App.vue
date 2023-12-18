@@ -3,6 +3,33 @@ import { ref } from "vue";
 
 const showModal = ref(false);
 const newNoteInput = ref("");
+const notes = ref([]);
+function getRandomColor() {
+  return "hsl(" + Math.random() * 360 + ", 100%, 75%)";
+}
+
+const errorMessage = ref("");
+
+const onAdd = () => {
+  if (newNoteInput.value.length < 10) {
+    return (errorMessage.value = "Note must be more than 10 Characters!");
+  }
+  notes.value.push({
+    id: Math.floor(Math.random() * 1000000),
+    text: newNoteInput.value,
+    date: new Date(),
+    backgroundColor: getRandomColor(),
+  });
+  showModal.value = false;
+  newNoteInput.value = "";
+  errorMessage.value = "";
+};
+
+const onClose = () => {
+  showModal.value = false;
+  newNoteInput.value = "";
+  errorMessage.value = "";
+};
 </script>
 
 <template>
@@ -16,36 +43,27 @@ const newNoteInput = ref("");
           cols="30"
           rows="10"
         ></textarea>
-        <button class="add-note">Add note</button>
-        <button class="close" @click="showModal = false">Close</button>
+        <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
+        <button class="add-note" @click="onAdd()">Add note</button>
+        <button class="close" @click="onClose()">Close</button>
       </div>
     </div>
     <div class="container">
       <header>
-        <h1>Note {{ showModal }}</h1>
+        <h1>Note</h1>
         <button @click="showModal = true">+</button>
       </header>
       <div class="card-container">
-        <div class="card">
+        <div
+          v-for="note in notes"
+          :key="note.id"
+          class="card"
+          :style="{ backgroundColor: note.backgroundColor }"
+        >
           <p class="main-text">
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Facilis
-            mollitia voluptatem iste blanditiis itaque nesciunt.
+            {{ note.text }}
           </p>
-          <p class="date">18th/12/2023</p>
-        </div>
-        <div class="card">
-          <p class="main-text">
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Facilis
-            mollitia voluptatem iste blanditiis itaque nesciunt.
-          </p>
-          <p class="date">18th/12/2023</p>
-        </div>
-        <div class="card">
-          <p class="main-text">
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Facilis
-            mollitia voluptatem iste blanditiis itaque nesciunt.
-          </p>
-          <p class="date">18th/12/2023</p>
+          <p class="date">{{ note.date.toLocaleDateString("en-US") }}</p>
         </div>
       </div>
     </div>
@@ -167,5 +185,10 @@ button {
 
 .close {
   background-color: red;
+}
+
+.error-text {
+  color: red;
+  font-weight: bold;
 }
 </style>
